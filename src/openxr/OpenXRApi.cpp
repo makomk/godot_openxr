@@ -1628,7 +1628,8 @@ bool OpenXRApi::initialiseInstance() {
 
 #ifdef ANDROID
 	request_extensions[XR_KHR_OPENGL_ES_ENABLE_EXTENSION_NAME] = nullptr;
-	request_extensions[XR_KHR_ANDROID_THREAD_SETTINGS_EXTENSION_NAME] = nullptr;
+//	request_extensions[XR_KHR_ANDROID_THREAD_SETTINGS_EXTENSION_NAME] = nullptr;
+	request_extensions[XR_KHR_ANDROID_CREATE_INSTANCE_EXTENSION_NAME] = nullptr;
 #else
 	request_extensions[XR_KHR_OPENGL_ENABLE_EXTENSION_NAME] = nullptr;
 #endif
@@ -1668,10 +1669,24 @@ bool OpenXRApi::initialiseInstance() {
 #define __GCC__
 #endif
 
+#ifdef ANDROID
+	activity_object = env->NewGlobalRef(android_api->godot_android_get_activity());
+	XrInstanceCreateInfoAndroidKHR instanceCreateAndroid = {
+		.type = XR_TYPE_INSTANCE_CREATE_INFO_ANDROID_KHR,
+		.next = nullptr,
+		.applicationVM = vm,
+		.applicationActivity = activity_object
+	};
+#endif
+
 	// Microsoft wants fields in definition to be in order or it will have a hissy fit!
 	XrInstanceCreateInfo instanceCreateInfo = {
 		.type = XR_TYPE_INSTANCE_CREATE_INFO,
+#ifdef ANDROID
+		.next = &instanceCreateAndroid,
+#else
 		.next = nullptr,
+#endif
 		.createFlags = 0,
 		.applicationInfo = {
 #ifdef __GCC__ // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55227
