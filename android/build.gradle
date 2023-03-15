@@ -22,6 +22,11 @@ android {
         }
     }
 
+    buildFeatures {
+        prefab true
+    }
+
+
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -72,6 +77,7 @@ android {
 dependencies {
     implementation "io.github.m4gr3d:godot:${versions.godotVersion}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinVersion}"
+    implementation "org.khronos.openxr:openxr_loader_for_android:1.0.26"
 }
 
 // When using the aar binary only, the *.gdns and *gdnlib files need to be in the same location
@@ -89,21 +95,8 @@ task copyAddonsConfig(type: Copy) {
     into targetDir
 }
 
-final soRootDir = "../thirdparty/oculus_mobile_sdk/OpenXR/Libs/Android"
 final supportedBuildTypes = ["debug", "release"]
 final supportedAbis = ["arm64-v8a", "armeabi-v7a"]
 
-task copyOpenXrLoaderSo(type: Copy) {
-    into("src")
-
-    for (String targetBuildType : supportedBuildTypes) {
-        for (String targetAbi : supportedAbis) {
-            from("${soRootDir}/${targetAbi}/${targetBuildType.capitalize()}") {
-                into("full${targetBuildType.capitalize()}/jniLibs/${targetAbi}")
-            }
-        }
-    }
-}
 
 preBuild.dependsOn(copyAddonsConfig)
-preBuild.dependsOn(copyOpenXrLoaderSo)
